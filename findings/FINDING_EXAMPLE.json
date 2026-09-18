@@ -1,0 +1,17 @@
+{
+  "finding_id": "CON-018",
+  "classification": "責任限制",
+  "judgment": "高風險",
+  "risk_level": "high",
+  "source_file": "contract_A.pdf",
+  "location": "第 18 條 / 第 27 頁 / 第 2 段",
+  "quote": "乙方之賠償責任不受任何限制，且包含間接損害...",
+  "analysis": "此條款未設定責任上限，且包含間接損害，與公司標準條款衝突，建議增設上限為合約總額",
+  "status": "需人工確認",
+  "related_files": [
+    "SOW.pdf",
+    "BoQ.xlsx"
+  ],
+  "config_rule": "risk_rules.yaml:high:賠償無上限",
+  "confidence": 0.92
+}

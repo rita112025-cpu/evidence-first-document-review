@@ -1,0 +1,23 @@
+# v2 - 支援多類型文件
+pipeline_version: "v2.0"
+stages: ["extract", "normalize", "analyze", "evidence_check", "report"]
+
+extract_types:
+  contract:
+    fields: ["parties", "term_renewal", "payment_terms", "penalty_cap", "termination", "confidentiality_ip", "governing_law", "limitation_of_liability"]
+    output: "extracted/contract/"
+  drawings:
+    fields: ["drawing_no", "revision", "system", "equipment", "clash", "missing_info"]
+    output: "extracted/drawings/"
+  boq:
+    fields: ["item_no", "quantity", "unit", "unit_price", "total", "discrepancy"]
+    output: "extracted/boq/"
+  specifications:
+    fields: ["material_req", "construction_req", "acceptance_criteria"]
+    output: "extracted/specifications/"
+  meeting:
+    fields: ["resolution", "todo", "owner", "due_date"]
+    output: "extracted/meeting/"
+
+finding_id_format: "{TYPE}-{NUM:03d}" # 例如 CON-018, DRW-005
+evidence_rule: "每個 Finding 必須有 source_file + location + quote + config_rule"

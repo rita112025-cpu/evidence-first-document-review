@@ -1,0 +1,20 @@
+{
+  "project": "project-a",
+  "run_id": "20260918-001",
+  "input_files": 30,
+  "processed_files": 30,
+  "failed_files": [],
+  "analysis_spec": "v1.2",
+  "analysis_spec_hash": "sha256:abc...",
+  "pipeline_version": "v2.0",
+  "stages": [
+    "extract",
+    "normalize",
+    "analyze",
+    "evidence_check",
+    "report"
+  ],
+  "generated_at": "2026-09-18T21:00:00+08:00",
+  "operator": "Claude Code",
+  "duration_seconds": 35
+}

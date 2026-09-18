@@ -1,0 +1,22 @@
+__pycache__/
+*.py[cod]
+.venv/
+
+# 使用者提供的原始文件與執行產物預設不進版控
+input/*
+!input/.gitkeep
+extracted/*
+!extracted/.gitkeep
+normalized/*
+!normalized/.gitkeep
+evidence/*
+!evidence/.gitkeep
+reports/*
+!reports/.gitkeep
+manifest.json
+findings.json
+unresolved.json
+
+# Findings 可能含合約原文，預設只保留去識別化範例
+findings/*.json
+!findings/FINDING_EXAMPLE.json

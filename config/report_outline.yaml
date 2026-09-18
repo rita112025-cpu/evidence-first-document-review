@@ -1,0 +1,13 @@
+chapters:
+  - "1. 執行摘要"
+  - "2. 文件清單與範圍"
+  - "3. 關鍵條款總表"
+  - "4. 交叉比對差異"
+  - "5. 風險分級清單"
+  - "6. 建議修改文字"
+  - "7. 證據附錄"
+
+acceptance_criteria:
+  - "每個 High Risk 都有原文、位置與來源檔案"
+  - "缺少證據的 Finding 不得進入報告"
+  - "輸出 findings.json、unresolved.json、Markdown 與 HTML"
