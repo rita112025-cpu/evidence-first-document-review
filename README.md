@@ -61,7 +61,7 @@ python scripts/05_build_report.py
 
 `.gitignore` 預設排除原始文件、執行產物與正式 Findings，避免把合約內容或敏感資料誤推到公開 GitHub。上傳前仍應人工檢查 `git status` 與 staged diff。
 
-架構展示頁位於 [`docs/architecture.html`](docs/architecture.html)，可直接用一般瀏覽器開啟。
+GitHub Pages 首頁位於 [`docs/index.html`](docs/index.html)，以白話介紹用途、流程與目前完成範圍。較詳細的工程架構保留在 [`docs/architecture.html`](docs/architecture.html)。
 
 ## 測試
 

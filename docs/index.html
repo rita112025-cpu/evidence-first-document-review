@@ -1,0 +1,424 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Evidence-first document review：把文件審查結果連回原文證據，產出可追溯、可重跑的 Findings 與報告。">
+  <title>Evidence-first Document Review</title>
+  <style>
+    :root {
+      --paper: #f5f1e8;
+      --paper-deep: #ebe5d8;
+      --ink: #192632;
+      --muted: #5d6870;
+      --navy: #193c57;
+      --green: #2f6857;
+      --amber: #b87522;
+      --red: #9a3d32;
+      --line: #d4ccbd;
+      --white: #fffdf8;
+      --shadow: 0 24px 70px rgba(25, 38, 50, 0.12);
+    }
+
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body {
+      margin: 0;
+      color: var(--ink);
+      background:
+        linear-gradient(rgba(25, 38, 50, 0.025) 1px, transparent 1px),
+        var(--paper);
+      background-size: 100% 32px;
+      font-family: "Noto Sans TC", "PingFang TC", "Microsoft JhengHei", sans-serif;
+      line-height: 1.7;
+    }
+
+    a { color: inherit; }
+    a:focus-visible, summary:focus-visible {
+      outline: 3px solid rgba(184, 117, 34, 0.55);
+      outline-offset: 4px;
+      border-radius: 3px;
+    }
+
+    .shell { width: min(1120px, calc(100% - 40px)); margin: 0 auto; }
+
+    .topbar {
+      position: sticky;
+      top: 0;
+      z-index: 10;
+      border-bottom: 1px solid rgba(25, 38, 50, 0.14);
+      background: rgba(245, 241, 232, 0.92);
+      backdrop-filter: blur(14px);
+    }
+
+    .topbar-inner {
+      min-height: 64px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 24px;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      font-weight: 800;
+      letter-spacing: -0.02em;
+    }
+
+    .brand-mark {
+      width: 34px;
+      height: 42px;
+      display: grid;
+      place-items: center;
+      color: var(--white);
+      background: var(--navy);
+      border-radius: 2px 10px 2px 2px;
+      font: 700 15px/1 Georgia, serif;
+      box-shadow: 4px 4px 0 var(--amber);
+    }
+
+    nav { display: flex; align-items: center; gap: 22px; font-size: 14px; }
+    nav a { text-decoration: none; color: var(--muted); }
+    nav a:hover { color: var(--ink); }
+
+    .hero {
+      min-height: 680px;
+      display: grid;
+      grid-template-columns: 1.08fr 0.92fr;
+      gap: 72px;
+      align-items: center;
+      padding: 88px 0 80px;
+    }
+
+    .kicker {
+      display: inline-flex;
+      align-items: center;
+      gap: 9px;
+      margin-bottom: 22px;
+      color: var(--green);
+      font-size: 14px;
+      font-weight: 800;
+    }
+
+    .kicker::before {
+      content: "";
+      width: 28px;
+      height: 3px;
+      background: var(--green);
+    }
+
+    h1, h2, h3 { margin-top: 0; }
+    h1 {
+      max-width: 760px;
+      margin-bottom: 26px;
+      font-family: Georgia, "Noto Serif TC", "PMingLiU", serif;
+      font-size: clamp(48px, 6.5vw, 84px);
+      line-height: 1.02;
+      letter-spacing: -0.055em;
+      font-weight: 600;
+    }
+
+    .hero-copy {
+      max-width: 670px;
+      margin: 0 0 30px;
+      color: var(--muted);
+      font-size: clamp(17px, 2vw, 21px);
+    }
+
+    .actions { display: flex; flex-wrap: wrap; gap: 12px; }
+    .button {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 48px;
+      padding: 0 20px;
+      border: 1px solid var(--ink);
+      border-radius: 3px;
+      text-decoration: none;
+      font-weight: 800;
+      transition: transform 140ms ease, box-shadow 140ms ease;
+    }
+    .button.primary { color: var(--white); background: var(--ink); }
+    .button.secondary { background: transparent; }
+    .button:hover { transform: translateY(-2px); box-shadow: 4px 5px 0 var(--amber); }
+
+    .document-demo {
+      position: relative;
+      min-height: 500px;
+      padding: 42px 38px 36px;
+      background: var(--white);
+      border: 1px solid var(--line);
+      box-shadow: var(--shadow);
+      transform: rotate(1.2deg);
+    }
+
+    .document-demo::before {
+      content: "審查中";
+      position: absolute;
+      top: 34px;
+      right: -18px;
+      padding: 8px 16px;
+      color: var(--red);
+      border: 3px double var(--red);
+      font-weight: 900;
+      letter-spacing: 0.12em;
+      transform: rotate(8deg);
+      background: var(--white);
+    }
+
+    .doc-meta { color: var(--muted); font-size: 13px; }
+    .doc-title {
+      margin: 18px 0 32px;
+      padding-bottom: 18px;
+      border-bottom: 2px solid var(--ink);
+      font: 600 29px/1.25 Georgia, "Noto Serif TC", serif;
+    }
+    .clause { margin: 0 0 20px; color: #46525b; }
+    .highlight {
+      color: var(--ink);
+      background: linear-gradient(transparent 58%, rgba(184, 117, 34, 0.34) 58%);
+    }
+    .finding-note {
+      margin-top: 30px;
+      padding: 18px 20px;
+      color: #e9fff6;
+      background: var(--green);
+      border-left: 7px solid #92c9b4;
+      transform: rotate(-1.5deg);
+      box-shadow: 7px 8px 0 rgba(47, 104, 87, 0.18);
+    }
+    .finding-note strong { display: block; margin-bottom: 4px; }
+
+    section { padding: 92px 0; border-top: 1px solid var(--line); }
+    .section-heading {
+      display: grid;
+      grid-template-columns: 0.65fr 1.35fr;
+      gap: 54px;
+      align-items: end;
+      margin-bottom: 48px;
+    }
+    .section-heading h2 {
+      margin-bottom: 0;
+      font: 600 clamp(34px, 4.5vw, 54px)/1.08 Georgia, "Noto Serif TC", serif;
+      letter-spacing: -0.035em;
+    }
+    .section-heading p { max-width: 650px; margin: 0; color: var(--muted); font-size: 18px; }
+
+    .workflow { display: grid; grid-template-columns: repeat(5, 1fr); border: 1px solid var(--line); background: var(--white); }
+    .step { position: relative; min-height: 250px; padding: 28px 24px; border-right: 1px solid var(--line); }
+    .step:last-child { border-right: 0; }
+    .step-number { color: var(--amber); font: 700 34px/1 Georgia, serif; }
+    .step h3 { margin: 58px 0 8px; font-size: 19px; }
+    .step p { margin: 0; color: var(--muted); font-size: 14px; }
+
+    .guardrails { display: grid; grid-template-columns: repeat(3, 1fr); gap: 28px; }
+    .guardrail { padding: 32px 0 24px; border-top: 6px solid var(--navy); }
+    .guardrail:nth-child(2) { border-color: var(--green); }
+    .guardrail:nth-child(3) { border-color: var(--amber); }
+    .guardrail h3 { margin-bottom: 12px; font: 600 25px/1.2 Georgia, "Noto Serif TC", serif; }
+    .guardrail p { margin: 0; color: var(--muted); }
+    .plain-label { display: block; margin-bottom: 12px; color: var(--muted); font-size: 13px; font-weight: 800; }
+
+    .status-wrap { display: grid; grid-template-columns: 1fr 1fr; gap: 22px; }
+    .status-block { padding: 34px; background: var(--white); border: 1px solid var(--line); }
+    .status-block.pending { background: var(--paper-deep); }
+    .status-block h3 { font-size: 23px; }
+    .status-list { margin: 0; padding: 0; list-style: none; }
+    .status-list li { position: relative; margin: 13px 0; padding-left: 28px; }
+    .status-list li::before { position: absolute; left: 0; font-weight: 900; }
+    .ready li::before { content: "✓"; color: var(--green); }
+    .pending-list li::before { content: "→"; color: var(--amber); }
+
+    .output-strip {
+      display: grid;
+      grid-template-columns: 0.85fr 1.15fr;
+      overflow: hidden;
+      color: var(--white);
+      background: var(--ink);
+    }
+    .output-copy { padding: 58px; }
+    .output-copy h2 { font: 600 42px/1.1 Georgia, "Noto Serif TC", serif; }
+    .output-copy p { color: #bec8cf; }
+    .terminal {
+      display: grid;
+      align-content: center;
+      padding: 46px;
+      color: #d5ede4;
+      background: #102e2b;
+      font: 14px/1.9 Consolas, "Courier New", monospace;
+    }
+    .terminal .muted { color: #78a296; }
+
+    details {
+      margin-top: 26px;
+      padding: 22px 26px;
+      border: 1px solid var(--line);
+      background: rgba(255, 253, 248, 0.6);
+    }
+    summary { cursor: pointer; font-weight: 800; }
+    details p { color: var(--muted); }
+
+    footer { padding: 40px 0 56px; color: var(--muted); font-size: 14px; }
+    .footer-inner { display: flex; justify-content: space-between; gap: 24px; }
+    footer a { color: var(--navy); }
+
+    @media (max-width: 900px) {
+      nav a:not(:last-child) { display: none; }
+      .hero { grid-template-columns: 1fr; gap: 56px; padding-top: 64px; }
+      .document-demo { width: min(620px, 96%); margin: 0 auto; }
+      .section-heading { grid-template-columns: 1fr; gap: 18px; }
+      .workflow { grid-template-columns: 1fr; }
+      .step { min-height: 0; border-right: 0; border-bottom: 1px solid var(--line); }
+      .step:last-child { border-bottom: 0; }
+      .step h3 { margin-top: 20px; }
+      .guardrails, .status-wrap, .output-strip { grid-template-columns: 1fr; }
+    }
+
+    @media (max-width: 560px) {
+      .shell { width: min(100% - 28px, 1120px); }
+      .hero { min-height: auto; padding: 48px 0 64px; }
+      h1 { font-size: 46px; }
+      .document-demo { padding: 34px 24px 28px; transform: none; }
+      .document-demo::before { right: -6px; }
+      section { padding: 68px 0; }
+      .output-copy, .terminal { padding: 34px 26px; }
+      .footer-inner { flex-direction: column; }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      html { scroll-behavior: auto; }
+      *, *::before, *::after { transition-duration: 0.01ms !important; }
+    }
+  </style>
+</head>
+<body>
+  <header class="topbar">
+    <div class="shell topbar-inner">
+      <div class="brand"><span class="brand-mark" aria-hidden="true">§</span><span>Evidence-first Review</span></div>
+      <nav aria-label="主要導覽">
+        <a href="#workflow">處理流程</a>
+        <a href="#status">目前狀態</a>
+        <a href="architecture.html">工程架構</a>
+      </nav>
+    </div>
+  </header>
+
+  <main>
+    <div class="shell hero">
+      <div>
+        <div class="kicker">文件審查流程骨架</div>
+        <h1>每個判斷，都能回到原文。</h1>
+        <p class="hero-copy">這是一套以證據為核心的文件審查流程：把合約、規範、圖說與清單整理成結構化 Finding，保留來源、頁碼與原文，再產出可供決策的報告。</p>
+        <div class="actions">
+          <a class="button primary" href="#workflow">先看怎麼運作</a>
+          <a class="button secondary" href="https://github.com/rita112025-cpu/evidence-first-document-review">查看 GitHub 原始碼</a>
+        </div>
+      </div>
+
+      <aside class="document-demo" aria-label="從合約原文產生 Finding 的示意">
+        <div class="doc-meta">contract_A.pdf　｜　第 27 頁　｜　第 18 條</div>
+        <div class="doc-title">服務採購合約</div>
+        <p class="clause">乙方就履行本合約所生之一切損害負賠償責任，<span class="highlight">其責任不受任何金額限制</span>，並包含間接及衍生性損害。</p>
+        <p class="clause">本條款於合約終止後仍繼續有效。</p>
+        <div class="finding-note">
+          <strong>Finding CON-018｜高風險</strong>
+          未設定賠償責任上限。建議將上限調整為合約總額，並排除間接損害。
+        </div>
+      </aside>
+    </div>
+
+    <section id="workflow">
+      <div class="shell">
+        <div class="section-heading">
+          <h2>從文件到決策，分成五個步驟</h2>
+          <p>流程刻意把「讀到什麼」和「怎麼判斷」分開。發現錯誤時，可以知道是抽取、格式整理、規則判斷，還是證據不足。</p>
+        </div>
+        <div class="workflow">
+          <article class="step"><div class="step-number">1</div><h3>抽取原文</h3><p>讀取文件內容，記錄檔名、頁碼與原文，不急著判斷風險。</p></article>
+          <article class="step"><div class="step-number">2</div><h3>統一格式</h3><p>把日期、金額、條款名稱與欄位整理成一致格式。</p></article>
+          <article class="step"><div class="step-number">3</div><h3>套用規則</h3><p>依核定的風險規則產生 Finding，標示風險與建議。</p></article>
+          <article class="step"><div class="step-number">4</div><h3>核對證據</h3><p>缺少原文、來源或位置的 Finding 會被擋下，不進報告。</p></article>
+          <article class="step"><div class="step-number">5</div><h3>產出報告</h3><p>彙整 Findings、待人工確認事項，以及 Markdown／HTML 報告。</p></article>
+        </div>
+      </div>
+    </section>
+
+    <section>
+      <div class="shell">
+        <div class="section-heading">
+          <h2>三個保護機制，白話說明</h2>
+          <p>原頁面所說的「3 個控制點」指的是下面三件事。目的不是增加流程，而是避免漏件、無證據結論與自動化誤判。</p>
+        </div>
+        <div class="guardrails">
+          <article class="guardrail"><span class="plain-label">避免漏看文件</span><h3>每次處理都有清冊</h3><p><code>manifest.json</code> 記錄收到幾份、處理幾份、失敗幾份，以及當時使用哪一版規則。</p></article>
+          <article class="guardrail"><span class="plain-label">避免沒有根據的結論</span><h3>每筆 Finding 綁定原文</h3><p>風險判斷必須能追到來源檔案、頁碼、條文位置與引用內容。</p></article>
+          <article class="guardrail"><span class="plain-label">避免機器自行做最後決定</span><h3>不確定的項目交給人</h3><p><code>unresolved.json</code> 集中列出需人工確認的事項，由法務或負責人完成最終判斷。</p></article>
+        </div>
+      </div>
+    </section>
+
+    <section id="status">
+      <div class="shell">
+        <div class="section-heading">
+          <h2>目前是工程骨架，不是線上審約服務</h2>
+          <p>專案提供可執行的追蹤、證據閘門與報告組裝；真正讀取 PDF、DOCX、XLSX 與判斷條款的能力，仍需串接 OCR、LLM 或企業既有系統。</p>
+        </div>
+        <div class="status-wrap">
+          <article class="status-block">
+            <h3>已可執行</h3>
+            <ul class="status-list ready">
+              <li>建立每次執行的 manifest 與規格雜湊</li>
+              <li>驗證 Finding 是否具有必要證據</li>
+              <li>阻擋缺少證據的 Finding</li>
+              <li>產出 findings、unresolved、Markdown 與 HTML</li>
+              <li>用自動化測試驗證核心流程</li>
+            </ul>
+          </article>
+          <article class="status-block pending">
+            <h3>導入前需要串接</h3>
+            <ul class="status-list pending-list">
+              <li>PDF／DOCX／XLSX 的文字與版面抽取</li>
+              <li>企業核定的審查規則與標準條款</li>
+              <li>LLM 分析或人工輸入 Finding</li>
+              <li>身分權限、案件管理與稽核紀錄</li>
+              <li>由法務確認實際適用方式</li>
+            </ul>
+          </article>
+        </div>
+
+        <details>
+          <summary>那這個專案適合誰？</summary>
+          <p>適合正在把人工文件審查流程工程化的團隊，作為資料格式、證據規則、報告輸出與模型整合的起點；不適合直接拿來替代律師或專業審查人員。</p>
+        </details>
+      </div>
+    </section>
+
+    <section>
+      <div class="shell output-strip">
+        <div class="output-copy">
+          <h2>先用範例跑通，再串接文件抽取。</h2>
+          <p>目前可執行 Stage 0、4、5。README 有完整說明與 Finding 格式。</p>
+          <a class="button secondary" href="https://github.com/rita112025-cpu/evidence-first-document-review#readme">閱讀操作說明</a>
+        </div>
+        <div class="terminal" aria-label="命令列執行範例">
+          <span class="muted"># 建立本次執行清冊</span>
+          <span>python scripts/00_manifest.py --project project-a</span>
+          <span class="muted"># 核對每筆 Finding 的證據</span>
+          <span>python scripts/04_evidence_check.py</span>
+          <span class="muted"># 產生報告</span>
+          <span>python scripts/05_build_report.py</span>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer>
+    <div class="shell footer-inner">
+      <span>Evidence-first Document Review｜參考實作</span>
+      <span><a href="architecture.html">查看進階工程架構</a></span>
+    </div>
+  </footer>
+</body>
+</html>
