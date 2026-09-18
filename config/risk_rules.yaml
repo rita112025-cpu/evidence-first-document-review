@@ -16,3 +16,35 @@ risk_levels:
 must_cite:
   - "所有 high risk"
   - "所有金額、日期、百分比"
+
+# Stage 3 機器比對用規則：keywords 為範例，正式關鍵字應由法務核定後擴充。
+# 每筆命中都會帶出逐字原文（quote）並標記「需人工確認」。
+rules:
+  - id: 賠償無上限
+    risk_level: high
+    description: 賠償責任未設定上限，或含懲罰性違約金
+    keywords: ["賠償責任不受任何限制", "賠償無上限", "懲罰性違約金", "不設上限", "無限賠償", "責任不受任何金額限制"]
+  - id: 自動續約無通知期
+    risk_level: high
+    description: 自動續約且通知期條件不明或過長
+    keywords: ["自動續約", "自動展延", "自動更新合約"]
+  - id: 單方任意終止
+    risk_level: high
+    description: 單方任意終止且無補償機制
+    keywords: ["任意終止", "單方終止", "逕行終止", "無須理由終止"]
+  - id: 境外管轄
+    risk_level: high
+    description: 管轄法院在境外且無仲裁選項
+    keywords: ["管轄法院", "境外法院", "外國法院", "專屬管轄"]
+  - id: 付款週期過長
+    risk_level: medium
+    description: 付款週期可能超過 60 天
+    keywords: ["付款週期", "帳期", "付款期限", "請款後"]
+  - id: 保密期過長
+    risk_level: medium
+    description: 保密期間可能超過 5 年
+    keywords: ["保密期間", "保密義務", "保密期限"]
+  - id: 競業限制過長
+    risk_level: medium
+    description: 競業限制期間可能超過 1 年
+    keywords: ["競業禁止", "競業限制"]

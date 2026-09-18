@@ -1,0 +1,11 @@
+# 核心流程（Stage 1–5）
+PyYAML>=6.0
+pymupdf>=1.24
+python-docx>=1.1
+openpyxl>=3.1
+
+# LLM 終審與 LLM 提案（Stage 3 --llm / Stage 6）走標準函式庫 HTTP，不需額外 SDK
+
+# 掃描件 OCR（選用）：另需安裝 Tesseract 執行檔與 chi_tra 語言包
+pytesseract>=0.3.10
+Pillow>=10.0
